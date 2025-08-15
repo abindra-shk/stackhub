@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: stackhub-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: stackhub
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    shm_size: 128mb
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: stackhub-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@stackhub.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - '5050:80'
+
+volumes:
+  postgres_data:
