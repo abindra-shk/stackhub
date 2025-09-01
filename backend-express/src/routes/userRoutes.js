@@ -1,27 +1,35 @@
 const express = require("express");
-const User = require("../models/User");
-
+const { createUser, getUsers, getUserById, updateUser, deleteUser } = require("../controllers/userController");
 const router = express.Router();
 
-// Create user
-router.post("/", async (req, res) => {
-  try {
-    const user = new User(req.body);
-    await user.save();
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+/**
+ * @summary Get all users
+ * @tags Users
+ */
+router.get("/", getUsers);
 
-// Get all users
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+/**
+ * @summary Get user by ID
+ * @tags Users
+ */
+router.get("/:id", getUserById);
+
+/**
+ * @summary Create new user
+ * @tags Users
+ */
+router.post("/", createUser);
+
+/**
+ * @summary Update user by ID
+ * @tags Users
+ */
+router.put("/:id", updateUser);
+
+/**
+ * @summary Delete user by ID
+ * @tags Users
+ */
+router.delete("/:id", deleteUser);
 
 module.exports = router;
