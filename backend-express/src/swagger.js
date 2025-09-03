@@ -12,8 +12,15 @@ function swaggerDocs(app) {
     swaggerUIPath: "/api-docs",
     exposeSwaggerUI: true,
     exposeApiDocs: true,
-    apiDocsPath: "/api-docs.json", // Postman can import this URL
+    apiDocsPath: "/api-docs.json",
     notRequiredAsNullable: false,
+    security: {
+      BearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
   };
 
   expressJSDocSwagger(app)(options);

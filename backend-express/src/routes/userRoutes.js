@@ -1,35 +1,23 @@
 const express = require("express");
-const { createUser, getUsers, getUserById, updateUser, deleteUser } = require("../controllers/userController");
+const { getUsers, getUserById } = require("../controllers/userController");
+const auth = require("../middleware/authMiddleware");
 const router = express.Router();
 
 /**
- * @summary Get all users
+ * GET /api/users
+ * @summary Get all users (protected)
  * @tags Users
+ * @security BearerAuth
  */
-router.get("/", getUsers);
+router.get("/", auth, getUsers);
 
 /**
- * @summary Get user by ID
+ * GET /api/users/{id}
+ * @summary Get user by ID (protected)
  * @tags Users
+ * @security BearerAuth
+ * @param {string} id.path.required - User ID
  */
-router.get("/:id", getUserById);
-
-/**
- * @summary Create new user
- * @tags Users
- */
-router.post("/", createUser);
-
-/**
- * @summary Update user by ID
- * @tags Users
- */
-router.put("/:id", updateUser);
-
-/**
- * @summary Delete user by ID
- * @tags Users
- */
-router.delete("/:id", deleteUser);
+router.get("/:id", auth, getUserById);
 
 module.exports = router;
