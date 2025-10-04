@@ -1,6 +1,11 @@
 const express = require("express");
 const { register, login } = require("../controllers/authController");
+const { registerValidation, loginValidation } = require("../middleware/validation");
+const { authLimiter } = require("../middleware/security");
 const router = express.Router();
+
+// Apply strict rate limiting to all auth routes
+router.use(authLimiter);
 
 /**
  * POST /api/auth/register
@@ -12,7 +17,7 @@ const router = express.Router();
  * @property {string} request.body.password.required - User's password - example: mypassword123
  * @return {object} 201 - created user
  */
-router.post("/register", register);
+router.post("/register", registerValidation, register);
 
 /**
  * POST /api/auth/login
@@ -23,6 +28,6 @@ router.post("/register", register);
  * @property {string} request.body.password.required - User's password - example: mypassword123
  * @return {object} 200 - { token, user }
  */
-router.post("/login", login);
+router.post("/login", loginValidation, login);
 
 module.exports = router;

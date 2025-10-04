@@ -1,56 +1,92 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const asyncHandler = require("../middleware/asyncHandler");
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
-// Register
-exports.register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+/**
+ * 📝 REGISTER USER
+ * @desc    Register a new user
+ * @route   POST /api/auth/register
+ * @access  Public
+ */
+exports.register = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ error: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({ name, email, password: hashedPassword });
-
-    res.status(201).json({ message: "User created", user });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  // Check if user exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({ 
+      success: false, 
+      error: "User already exists with this email" 
+    });
   }
-};
 
-// Login
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 12);
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
-    }
+  // Create user
+  const user = await User.create({ 
+    name, 
+    email, 
+    password: hashedPassword 
+  });
 
-    const user = await User.findOne({ email }).select("+password"); // include password only for auth
+  // Generate JWT token
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+  // Remove password from response
+  const userResponse = user.toObject();
+  delete userResponse.password;
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+  res.status(201).json({
+    success: true,
+    message: "User registered successfully",
+    token,
+    user: userResponse
+  });
+});
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+/**
+ * 🔐 LOGIN USER
+ * @desc    Authenticate user and get token
+ * @route   POST /api/auth/login
+ * @access  Public
+ */
+exports.login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    const userObj = user.toObject();
-    delete userObj.password; // redundant but safe
-    res.json({ token, user: userObj });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  // Find user and include password for comparison
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    return res.status(401).json({ 
+      success: false, 
+      error: "Invalid credentials" 
+    });
   }
-};
+
+  // Check password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(401).json({ 
+      success: false, 
+      error: "Invalid credentials" 
+    });
+  }
+
+  // Generate JWT token
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+
+  // Remove password from response
+  const userResponse = user.toObject();
+  delete userResponse.password;
+
+  res.json({
+    success: true,
+    message: "Login successful",
+    token,
+    user: userResponse
+  });
+});
