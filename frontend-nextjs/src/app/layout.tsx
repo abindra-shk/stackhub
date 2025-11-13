@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,66 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Header */}
+        <header className="w-full bg-gray-900 text-white py-4 px-6">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <h1 className="text-xl font-semibold">My Next.js App</h1>
+
+            {/* Navigation */}
+            <nav className="space-x-4 flex items-center">
+              <Link href="/" className="hover:text-gray-300">
+                Home
+              </Link>
+              <Link href="/about" className="hover:text-gray-300">
+                About
+              </Link>
+              <Link href="/contact" className="hover:text-gray-300">
+                Contact
+              </Link>
+
+              {/* Nested Blog Dropdown */}
+              <div className="relative group inline-block">
+                <button className="hover:text-gray-300">Blog ▾</button>
+
+                {/* Dropdown menu */}
+                <div className="hidden group-hover:block absolute top-6 right-0 bg-gray-800 text-white rounded shadow-lg min-w-[150px]">
+                  <div className="flex flex-col py-2">
+                    <Link href="/blog" className="px-4 py-2 hover:bg-gray-700">
+                      All Posts
+                    </Link>
+                    <Link
+                      href="/blog/latest"
+                      className="px-4 py-2 hover:bg-gray-700"
+                    >
+                      Latest
+                    </Link>
+                    <Link
+                      href="/blog/categories"
+                      className="px-4 py-2 hover:bg-gray-700"
+                    >
+                      Categories
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="min-h-screen max-w-6xl mx-auto px-6 py-8">
+          {children}
+        </main>
+
+        {/* Footer */}
+        <footer className="w-full bg-gray-900 text-white py-4 px-6 mt-10">
+          <div className="max-w-6xl mx-auto text-center">
+            <p className="text-sm">
+              &copy; {new Date().getFullYear()} My Next.js App. All rights
+              reserved.
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );
